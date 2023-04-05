@@ -42,6 +42,14 @@ async def on_ready():
 
 # --------------- Custom Commands --------------- #
 @client.command(pass_context=True)
+async def 指令(ctx):
+    intro = "==========================\n👇 以下是所有有效的指令 👇\n==========================\n"
+    helper = ['!加入', '!新增首領', '!首領', '!刪除', '!紀錄', '!所有紀錄', '!退出']
+    helper_command_str = "\n".join(helper)
+    await ctx.send(intro + helper_command_str)
+
+
+@client.command(pass_context=True)
 async def 首領(ctx):
     intro = "==========================\n👇 以下是所有有效的首領名稱 👇\n==========================\n"
     list_of_boss_names = [f"{x} ---- {BOSS_RESPAWN_TIMERS[x]}H" for x in BOSS_RESPAWN_TIMERS if x != "test"]
@@ -102,6 +110,12 @@ async def 紀錄(ctx):
 
     # Get the boss's respawn timer
     boss_res_timer = BOSS_RESPAWN_TIMERS[boss_name]
+
+    # Set event time
+    if len(args) > 2:
+        if args[2] == 'half':
+            boss_res_timer = (BOSS_RESPAWN_TIMERS[boss_name]) / 2
+
     # Calculate the future time
     new_res_time = current_time + timedelta(hours=boss_res_timer)
     if boss_name == "test":
@@ -157,6 +171,23 @@ async def 退出(ctx):
     else:
         await ctx.send("您目前並沒有在語音頻道裡面")
 
+@client.command(pass_context=True)
+async def 說話(ctx):
+    if VOICE_CHANNEL:
+        speech = gTTS(text=f"機,,,,油,,,,好,,,,難喝,,,ㄜ,,,ㄜ,,,ㄜ ", lang="zh-CN", slow=False)
+        speech.save(MP3_FILE_LOCATION)
+        # Play first alert sound
+        VOICE_CHANNEL.play(discord.FFmpegPCMAudio(source=ALERT_FILE_LOCATION))
+        
+        # Wait for it to finish
+        counter = 0
+        duration = audio_len(ALERT_FILE_LOCATION)
+        while not counter >= duration:
+            await asyncio.sleep(1)
+            counter += 1
+
+        # Play reminder message
+        VOICE_CHANNEL.play(discord.FFmpegPCMAudio(source=MP3_FILE_LOCATION))
 
 @tasks.loop(seconds=1.0)
 async def reminder():
