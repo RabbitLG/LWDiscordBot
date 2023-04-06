@@ -41,15 +41,11 @@ async def on_ready():
 
 
 # --------------- Custom Commands --------------- #
-@client.command(pass_context=True)
-async def 指令(ctx):
-    intro = "==========================\n👇 以下是所有有效的指令 👇\n==========================\n"
-    helper = ['!加入', '!新增首領', '!首領', '!刪除', '!紀錄', '!所有紀錄', '!退出']
-    helper_command_str = "\n".join(helper)
-    await ctx.send(intro + helper_command_str)
-
-
-@client.command(pass_context=True)
+@client.command(
+    pass_context=True,
+    help="使用 !新增首領 指令將首領名稱加入列表，並使用 !首領 查看所有有效的首領名稱。",
+    brief="列出所有有效的首領名稱。"
+)
 async def 首領(ctx):
     intro = "==========================\n👇 以下是所有有效的首領名稱 👇\n==========================\n"
     list_of_boss_names = [f"{x} ---- {BOSS_RESPAWN_TIMERS[x]}H" for x in BOSS_RESPAWN_TIMERS if x != "test"]
@@ -57,7 +53,11 @@ async def 首領(ctx):
     await ctx.send(intro + boss_name_str)
 
 
-@client.command(pass_context=True)
+@client.command(
+    pass_context=True,
+    help="請輸入 !新增首領 <首領名稱> <首領重生時間> 來新增首領名稱及重生時間。",
+    brief="新增首領名稱及重生時間。"
+)
 async def 新增首領(ctx):
     # Sanitize lsit of inputs
     args = ctx.message.content.split(" ")[1:]
@@ -78,7 +78,11 @@ async def 新增首領(ctx):
     await ctx.send(f"🤘🏼 🤘🏼 成功新增了新首領名稱! -- 【{boss_name}】 設定每{boss_respawn_time}小時會重生")
 
 
-@client.command(pass_context=True)
+@client.command(
+    pass_context=True,
+    help="請輸入 !刪除 <首領重生時間> 來刪除該首領重生紀錄。",
+    brief="刪除首領重生紀錄。"
+)
 async def 刪除(ctx):
     args = ctx.message.content.split(" ")[1:]
     if len(args) < 1:
@@ -89,7 +93,11 @@ async def 刪除(ctx):
     RECORDED_BOSS_TIMES.pop(res_time)
 
 
-@client.command(pass_context=True)
+@client.command(
+    pass_context=True,
+    help="請輸入 !紀錄 <首領名稱> <?首領重生時間> 來記錄首領重生時間。",
+    brief="紀錄首領重生時間。"
+)
 async def 紀錄(ctx):
     # Sanitize lsit of inputs
     args = ctx.message.content.split(" ")[1:]
@@ -133,7 +141,11 @@ async def 紀錄(ctx):
     await ctx.send(f"🎉 成功紀錄了王死亡時間! -- 將會在 {new_res_time_str} 的十分鐘前提醒大家【{boss_name}】的重生 🎉")
 
 
-@client.command(pass_context=True)
+@client.command(
+    pass_context=True,
+    help="使用 !紀錄 指令將首領重生時間加入列表，並使用 !所有紀錄 查看已紀錄首領的重生時間。",
+    brief="查看目前已紀錄首領重生時間。"
+)
 async def 所有紀錄(ctx):
     if not RECORDED_BOSS_TIMES:
         await ctx.send(f"目前沒有任何紀錄")
@@ -152,7 +164,11 @@ async def 所有紀錄(ctx):
     await ctx.send(str_record_times)
 
 
-@client.command(pass_context=True)
+@client.command(
+    pass_context=True,
+    help="新增七殺小助理至使用者所在的語音頻道。",
+    brief="將七殺小助理新增至語音頻道。"
+)
 async def 加入(ctx):
     global VOICE_CHANNEL
     if (ctx.author.voice):
@@ -162,7 +178,11 @@ async def 加入(ctx):
         await ctx.send("您目前並沒有在語音頻道裡面")
 
 
-@client.command(pass_context=True)
+@client.command(
+    pass_context=True,
+    help="將七殺小助理退出目前所在的語音頻道。",
+    brief="將七殺小助理退出語音頻道。"
+)
 async def 退出(ctx):
     global VOICE_CHANNEL
     if (ctx.voice_client):
@@ -171,7 +191,11 @@ async def 退出(ctx):
     else:
         await ctx.send("您目前並沒有在語音頻道裡面")
 
-@client.command(pass_context=True)
+@client.command(
+    pass_context=True,
+    help="請先使用 !加入 將七殺小助理新增至語音頻道，並使用 !說話 測試語音功能。",
+    brief="測試七殺小助理語音功能。"
+)
 async def 說話(ctx):
     if VOICE_CHANNEL:
         speech = gTTS(text=f"機,,,,油,,,,好,,,,難喝,,,ㄜ,,,ㄜ,,,ㄜ ", lang="zh-CN", slow=False)
@@ -192,7 +216,7 @@ async def 說話(ctx):
 @tasks.loop(seconds=1.0)
 async def reminder():
     # Grab the channel to send message
-    channel = client.get_channel(1044858675623383060)
+    channel = client.get_channel(int(1044858675623383060))
 
     # Get current time in Taiwan + 10 minutes in the future
     new_res_time_plus_ten = datetime.now(timezone("Asia/Taipei")) + timedelta(minutes=10)
